@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dear Tree — Melbourne Urban Forest</title>
+<style>
+:root{
+  --green:#1D9E75;--green-d:#0F6E56;--green-l:#E1F5EE;--green-deep:#085041;
+  --red:#A32D2D;--red-l:#FCEBEB;--red-deep:#501313;
+  --amber:#BA7517;--amber-l:#FAEEDA;--amber-deep:#633806;
+  --blue:#185FA5;--blue-l:#E6F1FB;--blue-deep:#0C3A6B;
+  --purple:#6B3FA0;--purple-l:#F0EAF9;--purple-deep:#2E1248;
+  --bg:#F5F3EF;--card:#FFFFFF;--border:rgba(0,0,0,0.08);
+  --text:#1a1a1a;--muted:#666;--hint:#aaa;--r:12px;--rs:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR','Apple SD Gothic Neo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+#app{max-width:700px;margin:0 auto;padding:24px 16px 60px;}
+.intro-box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:2.5rem 2rem;text-align:center;margin-top:16px;}
+.intro-logo{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--green);text-transform:uppercase;margin-bottom:18px;}
+.intro-title{font-size:26px;font-weight:800;line-height:1.3;margin-bottom:6px;}
+.intro-sub{font-size:14px;color:var(--muted);margin-bottom:24px;}
+.type-legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:20px;}
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.info-card{background:var(--bg);border-radius:var(--rs);padding:14px 8px;text-align:center;}
+.info-num{font-size:22px;font-weight:800;color:var(--green);}
+.info-lbl{font-size:11px;color:var(--muted);margin-top:3px;}
+.time-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px;}
+.time-card{background:var(--bg);border-radius:var(--rs);padding:10px 12px;display:flex;align-items:center;gap:8px;}
+.time-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.time-lbl{font-size:12px;color:var(--muted);}
+.time-val{font-size:13px;font-weight:700;}
+.start-btn{width:100%;padding:16px;font-size:16px;font-weight:800;font-family:inherit;background:var(--green);color:#fff;border:none;border-radius:var(--r);cursor:pointer;transition:background .15s,transform .1s;}
+.start-btn:hover{background:var(--green-d);}
+.start-btn:active{transform:scale(.98);}
+.type-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:800;}
+.tb-g{background:var(--blue-l);color:var(--blue-deep);}
+.tb-b{background:var(--purple-l);color:var(--purple-deep);}
+.tb-o{background:var(--amber-l);color:var(--amber-deep);}
+.hd-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.quiz-counter{font-size:13px;font-weight:700;color:var(--muted);}
+.cutline-chip{font-size:12px;font-weight:700;color:var(--green-deep);background:var(--green-l);padding:3px 10px;border-radius:99px;}
+.progress-wrap{height:5px;background:#DDD;border-radius:99px;overflow:hidden;margin-bottom:12px;}
+.progress-fill{height:5px;background:var(--green);border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.timer-row{display:flex;justify-content:flex-end;margin-bottom:12px;}
+.timer-block{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.timer-lbl{font-size:10px;color:var(--hint);text-transform:uppercase;letter-spacing:.05em;}
+.timer-ring{position:relative;width:52px;height:52px;}
+.timer-ring svg{transform:rotate(-90deg);}
+.timer-ring circle{fill:none;stroke-width:4;}
+.ring-bg{stroke:#E0E0E0;}
+.ring-fill{stroke:var(--green);stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke .4s;}
+.timer-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:var(--text);}
+.tw .ring-fill{stroke:var(--amber);}.tw .timer-num{color:var(--amber);}
+.td .ring-fill{stroke:var(--red);}.td .timer-num{color:var(--red);}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.td .timer-ring{animation:pulse .8s infinite;}
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:14px;animation:fadeUp .22s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.q-num{font-size:11px;color:var(--hint);margin-bottom:8px;}
+.q-en{font-size:15px;line-height:2;margin-bottom:14px;color:var(--text);}
+.q-sub{font-size:14px;color:var(--text);margin-bottom:12px;line-height:1.7;}
+.blank-tag{font-weight:800;font-size:14px;color:var(--blue);background:var(--blue-l);padding:2px 8px;border-radius:5px;margin:0 2px;}
+.choices{display:flex;gap:8px;flex-wrap:wrap;}
+.choice-btn{flex:1;min-width:90px;padding:11px 12px;font-size:14px;font-family:inherit;border:1.5px solid var(--border);border-radius:var(--rs);background:var(--card);color:var(--text);cursor:pointer;text-align:center;font-weight:600;transition:all .12s;}
+.choice-btn:hover:not(:disabled){border-color:var(--green);background:var(--green-l);color:var(--green-deep);}
+.choice-btn.correct{background:var(--green-l);border-color:var(--green);color:var(--green-deep);font-weight:800;}
+.choice-btn.wrong{background:var(--red-l);border-color:var(--red);color:var(--red-deep);}
+.choice-btn:disabled{cursor:default;}
+.blank-input-wrap{display:flex;gap:8px;}
+.blank-input{flex:1;padding:11px 13px;font-size:15px;font-family:inherit;border:1.5px solid #CCC;border-radius:var(--rs);background:#FAFAFA;color:var(--text);outline:none;transition:border-color .15s;}
+.blank-input:focus{border-color:var(--purple);background:#fff;}
+.blank-input.correct{border-color:var(--green);background:var(--green-l);color:var(--green-deep);}
+.blank-input.wrong{border-color:var(--red);background:var(--red-l);color:var(--red-deep);}
+.submit-btn{padding:11px 16px;font-size:14px;font-weight:700;font-family:inherit;background:var(--purple);color:#fff;border:none;border-radius:var(--rs);cursor:pointer;white-space:nowrap;}
+.submit-btn:hover{background:var(--purple-deep);}
+.answer-reveal{margin-top:10px;padding:9px 13px;border-radius:var(--rs);font-size:13px;font-weight:600;}
+.ar-ok{background:var(--green-l);color:var(--green-deep);}
+.ar-ng{background:var(--red-l);color:var(--red-deep);}
+.order-area-lbl{font-size:11px;color:var(--hint);margin-bottom:6px;font-weight:700;text-transform:uppercase;}
+.order-area{min-height:50px;border:2px dashed #DDD;border-radius:var(--rs);padding:8px 10px;display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px;align-items:center;}
+.order-area.filled{border-color:var(--amber);background:var(--amber-l);}
+.word-chip{padding:7px 13px;font-size:14px;font-weight:600;border-radius:99px;cursor:pointer;transition:all .14s;user-select:none;white-space:nowrap;}
+.wc-avail{background:var(--card);border:1.5px solid var(--border);color:var(--text);}
+.wc-avail:hover{border-color:var(--amber);background:var(--amber-l);color:var(--amber-deep);}
+.wc-placed{background:var(--amber-l);border:1.5px solid var(--amber);color:var(--amber-deep);}
+.order-check-btn{width:100%;padding:12px;font-size:14px;font-weight:800;font-family:inherit;background:var(--amber);color:#fff;border:none;border-radius:var(--rs);cursor:pointer;margin-top:6px;}
+.order-check-btn:hover:not(:disabled){background:var(--amber-deep);}
+.order-check-btn:disabled{background:#CCC;cursor:default;}
+.timeout-msg{margin-top:10px;padding:10px 14px;border-radius:var(--rs);font-size:13px;font-weight:600;background:var(--amber-l);color:var(--amber-deep);border:1px solid #FAC775;}
+.result-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:30px 22px;text-align:center;margin-bottom:14px;}
+.result-emoji{font-size:46px;margin-bottom:10px;}
+.result-score{font-size:54px;font-weight:800;line-height:1;margin-bottom:8px;}
+.score-pass{color:var(--green);}.score-fail{color:var(--red);}
+.result-badge{display:inline-block;padding:5px 16px;border-radius:99px;font-size:14px;font-weight:800;margin-bottom:8px;}
+.badge-pass{background:var(--green-l);color:var(--green-deep);}
+.badge-fail{background:var(--red-l);color:var(--red-deep);}
+.result-pct{font-size:13px;color:var(--muted);margin-bottom:20px;}
+.stat-row{display:flex;gap:10px;justify-content:center;margin-bottom:24px;flex-wrap:wrap;}
+.stat-card{background:var(--bg);border-radius:var(--rs);padding:12px 16px;}
+.stat-num{font-size:22px;font-weight:800;}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:2px;}
+.s-ok{color:var(--green);}.s-ng{color:var(--red);}.s-to{color:var(--amber);}
+.retry-btn{width:100%;padding:14px;font-size:15px;font-weight:800;font-family:inherit;background:var(--green);color:#fff;border:none;border-radius:var(--r);cursor:pointer;transition:background .15s,transform .1s;}
+.retry-btn:hover{background:var(--green-d);}
+.retry-btn:active{transform:scale(.98);}
+.review-title{font-size:14px;font-weight:800;margin-bottom:10px;margin-top:14px;}
+.review-item{background:var(--card);border:1px solid #F09595;border-radius:var(--rs);padding:13px 15px;margin-bottom:8px;}
+.review-item.to{border-color:#FAC775;}
+.r-num{font-size:11px;color:var(--hint);margin-bottom:6px;}
+.r-en{font-size:13px;color:var(--text);margin-bottom:8px;line-height:1.8;}
+.tag{display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;margin-right:4px;margin-top:2px;}
+.tag-ng{background:var(--red-l);color:var(--red-deep);}
+.tag-ok{background:var(--green-l);color:var(--green-deep);}
+.tag-to{background:var(--amber-l);color:var(--amber-deep);}
+.hist-section{margin-top:20px;}
+.hist-title{font-size:14px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.hist-clear{font-size:11px;font-weight:600;color:var(--red);background:none;border:none;cursor:pointer;}
+.hist-empty{font-size:13px;color:var(--hint);text-align:center;padding:20px 0;}
+.hist-item{background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:12px 16px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;}
+.hist-item:hover{border-color:var(--green);}
+.hist-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.hist-left{flex:1;}
+.hist-date{font-size:11px;color:var(--hint);margin-bottom:4px;}
+.hist-score{font-size:18px;font-weight:800;}
+.hist-score.pass{color:var(--green);}.hist-score.fail{color:var(--red);}
+.hist-pct{font-size:12px;color:var(--muted);margin-top:2px;}
+.hist-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;}
+.hb-pass{background:var(--green-l);color:var(--green-deep);}
+.hb-fail{background:var(--red-l);color:var(--red-deep);}
+.hist-bar-wrap{width:80px;height:6px;background:#E0E0E0;border-radius:99px;overflow:hidden;margin-top:4px;}
+.hist-bar{height:6px;border-radius:99px;}
+.hist-detail{margin-top:12px;border-top:1px solid var(--border);padding-top:10px;display:none;}
+.hist-detail.open{display:block;}
+.hd-item{background:var(--bg);border-radius:var(--rs);padding:10px 12px;margin-bottom:6px;}
+.hd-item.hd-to{border-left:3px solid var(--amber);}
+.hd-item.hd-ng{border-left:3px solid var(--red);}
+.hd-qnum{font-size:10px;color:var(--hint);margin-bottom:4px;}
+.hd-en{font-size:12px;line-height:1.7;margin-bottom:5px;}
+.hd-tags{display:flex;flex-wrap:wrap;gap:4px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const ALL_Q = [
+  {n:'1',t:'g',prev:'Dear Tree,',en:'[A] I walk past you, your beautiful leaves bring a smile to my face.',blanks:[{l:'[A]',c:['However','Whenever'],a:'Whenever'}]},
+  {n:'2',t:'g',prev:'Whenever I walk past you, your beautiful leaves bring a smile to my face.',en:'[A] I stop in front of you and take a deep breath of fresh air, I appreciate the oxygen that you produce.',blanks:[{l:'[A]',c:['Whatever','Whenever'],a:'Whenever'}]},
+  {n:'3',t:'b',prev:'Whenever I walk past you, your beautiful leaves bring a smile to my face.',en:'Whenever I stop in front of you and _____ _____ _____ _____ of fresh air, I appreciate the oxygen that you produce.',a:'take a deep breath'},
+  {n:'4',t:'b',prev:'Whenever I stop in front of you and take a deep breath of fresh air,',en:'Whenever I stop in front of you and take a deep breath of fresh air, I _____ the oxygen that you produce.',a:'appreciate'},
+  {n:'5',t:'g',prev:'Whenever I stop in front of you and take a deep breath of fresh air, I appreciate the oxygen',en:'I appreciate the oxygen [A] you produce.',blanks:[{l:'[A]',c:['that','what'],a:'that'}]},
+  {n:'6',t:'w',prev:'I appreciate the oxygen that you produce.',en:'[A] you and all your friends, we humans wouldn\'t be able to get enough oxygen.',ws:['Without','But for','Were it not for','If it hadn\'t been for'],a:'If it hadn\'t been for'},
+  {n:'7',t:'g',prev:'If it hadn\'t been for you and all your friends, we humans wouldn\'t be able',en:'Without you and all your friends, we humans wouldn\'t be able [A] enough oxygen.',blanks:[{l:'[A]',c:['getting','to get'],a:'to get'}]},
+  {n:'8',t:'o',prev:'By the way,',ko:'나는 네 가지에 새 한 가족이 둥지를 만든 것을 알아챘어.',en:'_____.',ws:['I noticed','that','a family of birds','has made','a nest','in your branches'],a:'I noticed that a family of birds has made a nest in your branches.'},
+  {n:'9',t:'o',prev:'I noticed that a family of birds has made a nest in your branches.',ko:'네가 그들에게 집을 제공해 주는 것은 정말 친절해.',en:'_____.',ws:['It\'s so kind','of you','to provide','them with','a home'],a:'It\'s so kind of you to provide them with a home.'},
+  {n:'10',t:'o',prev:'It\'s so kind of you to provide them with a home.',ko:'나는 더 많은 사람들이 나무들이 환경에 얼마나 중요한지 알아채기를 바라.',en:'_____.',ws:['I hope that','more people realize','how important','you and all the other trees','are to the environment'],a:'I hope that more people realize how important you and all the other trees are to the environment.'},
+  {n:'11',t:'b',prev:'Have a nice day!',en:'_____ _____ _____ _____, trees in Melbourne, Australia receive emails like this all the time.',a:'Believe it or not'},
+  {n:'12',t:'g',prev:'Believe it or not, trees in Melbourne, Australia',en:'Believe it or not, trees in Melbourne, Australia [A] emails like this all the time.',blanks:[{l:'[A]',c:['receives','receive'],a:'receive'}]},
+  {n:'13',t:'o',prev:'Believe it or not, trees in Melbourne, Australia receive emails like this all the time.',ko:'나무들이 이메일 주소들을 갖고 있는 것이 어떻게 가능할까?',en:'_____?',ws:['How','is it possible','that','trees have','email addresses'],a:'How is it possible that trees have email addresses?'},
+  {n:'14',t:'g',prev:'How is it possible that trees have email addresses?',en:'And why are people [A] them messages?',blanks:[{l:'[A]',c:['sending','sent'],a:'sending'}]},
+  {n:'15',t:'g',prev:'And why are people sending them messages?',en:'The story behind these emails [A] with Melbourne\'s Urban Forest Strategy plan.',blanks:[{l:'[A]',c:['begins','begin'],a:'begins'}]},
+  {n:'16',t:'b',prev:'The story behind these emails begins with Melbourne\'s Urban Forest Strategy plan,',en:'Melbourne\'s Urban Forest Strategy plan was a response to Australia\'s _____ _____.',a:'millennium drought'},
+  {n:'17',t:'g',prev:'Melbourne\'s Urban Forest Strategy plan was a response to Australia\'s millennium drought.',en:'This [A] lasted from the late 1990s to 2010.',blanks:[{l:'[A]',c:['drought','flood'],a:'drought'}]},
+  {n:'18',t:'b',prev:'This drought lasted from the late 1990s to 2010.',en:'_____ _____ _____ it ended, 40 percent of the city\'s 77,000 trees were in a state of declining health.',a:'By the time'},
+  {n:'19',t:'w',prev:'By the time it ended,',en:'40 percent of the city\'s 77,000 trees were in a state of _____ health.',ws:['declining','decreasing','reducing','increasing'],a:'increasing'},
+  {n:'20',t:'g',prev:'By the time it ended, 40 percent of the city\'s 77,000 trees were in a state of declining health.',en:'[A], the overall number of trees was decreasing.',blanks:[{l:'[A]',c:['Furthermore','Consequently'],a:'Furthermore'}]},
+  {n:'21',t:'b',prev:'Furthermore,',en:'Furthermore, the _____ number of trees was decreasing.',a:'overall'},
+  {n:'22',t:'g',prev:'Furthermore, the overall number of trees',en:'The overall number of trees [A] decreasing.',blanks:[{l:'[A]',c:['was','were'],a:'was'}]},
+  {n:'23',t:'g',prev:'As a result,',en:'The amount of shade [A] by trees within the city was decreasing.',blanks:[{l:'[A]',c:['provided','providing'],a:'provided'}]},
+  {n:'24',t:'g',prev:'The amount of shade provided by trees within the city,',en:'The amount of shade provided by trees within the city, also [A] as canopy cover, decreased.',blanks:[{l:'[A]',c:['knowing','known'],a:'known'}]},
+  {n:'25',t:'b',prev:'The amount of shade provided by trees within the city, also known as canopy cover,',en:'The amount of shade provided by trees, also known as canopy cover, _____.',a:'decreased'},
+  {n:'26',t:'o',prev:'The amount of shade provided by trees, also known as canopy cover, decreased.',ko:'임관 피복도의 손실은 도시 환경에 주요한 위협이다.',en:'_____',ws:['The loss of','canopy cover','is a major threat','to urban environments'],a:'The loss of canopy cover is a major threat to urban environments'},
+  {n:'27',t:'g',prev:'The loss of canopy cover is a major threat to urban environments',en:'The loss of canopy cover is a major threat to urban environments because it [A] temperatures.',blanks:[{l:'[A]',c:['raises','lowers'],a:'raises'}]},
+  {n:'28',t:'g',prev:'Higher temperatures in cities can be dangerous for residents,',en:'Higher temperatures in cities can be dangerous for residents, as they [A] the risk of heat exhaustion.',blanks:[{l:'[A]',c:['increase','decrease'],a:'increase'}]},
+  {n:'29',t:'b',prev:'Higher temperatures in cities can be dangerous for residents, as they increase the risk of',en:'Higher temperatures in cities increase the risk of _____ _____.',a:'heat exhaustion'},
+  {n:'30',t:'w',prev:'Higher temperatures in cities increase the risk of heat exhaustion.',en:'They also _____ a rise in the use of air conditioning.',ws:['lead to','result in','interfere with','bring about'],a:'interfere with'},
+  {n:'31',t:'g',prev:'Higher temperatures in cities increase the risk of heat exhaustion. They also lead to',en:'They also lead to a [A] in the use of air conditioning.',blanks:[{l:'[A]',c:['rise','decline'],a:'rise'}]},
+  {n:'32',t:'b',prev:'They also lead to a rise in the use of air conditioning.',en:'This _____ _____ climate change by increasing energy consumption and greenhouse gas emissions.',a:'speeds up'},
+  {n:'33',t:'g',prev:'This speeds up climate change by',en:'This speeds up climate change by [A] energy consumption and greenhouse gas emissions.',blanks:[{l:'[A]',c:['increasing','decreasing'],a:'increasing'}]},
+  {n:'34',t:'g',prev:'This speeds up climate change by increasing energy',en:'This speeds up climate change by increasing energy [A] and greenhouse gas emissions.',blanks:[{l:'[A]',c:['consumption','production'],a:'consumption'}]},
+  {n:'35',t:'b',prev:'This speeds up climate change by increasing energy consumption and greenhouse gas',en:'This speeds up climate change by increasing energy consumption and greenhouse gas _____.',a:'emissions'},
+  {n:'36',t:'o',prev:'This speeds up climate change by increasing energy consumption and greenhouse gas emissions.',ko:'멜버른의 나무들의 손실을 다루기 위해 무언가가 행해져야 했다.',en:'_____.',ws:['Something','had to be done','to deal with','the loss of','Melbourne\'s trees'],a:'Something had to be done to deal with the loss of Melbourne\'s trees.'},
+  {n:'37',t:'b',prev:'Something had to be done to deal with the loss of Melbourne\'s trees.',en:'In 2012, the city government _____ its Urban Forest Strategy plan.',a:'announced'},
+  {n:'38',t:'b',prev:'In 2012, the city government announced its Urban Forest Strategy plan.',en:'It set the _____ goal of planting more than 3,000 trees every year for the next twenty years.',a:'ambitious'},
+  {n:'39',t:'g',prev:'It set the ambitious goal of',en:'It set the ambitious goal of [A] more than 3,000 trees every year for the next twenty years.',blanks:[{l:'[A]',c:['plant','planting'],a:'planting'}]},
+  {n:'40',t:'g',prev:'It set the ambitious goal of planting more than 3,000 trees every year for the next twenty years.',en:'The plan also [A] the creation of an online map called the Urban Forest Visual.',blanks:[{l:'[A]',c:['involved','excluded'],a:'involved'}]},
+  {n:'41',t:'g',prev:'The plan also involved the creation of an online map',en:'The plan also involved the creation of an online map [A] the Urban Forest Visual.',blanks:[{l:'[A]',c:['called','was called'],a:'called'}]},
+  {n:'42',t:'b',prev:'The plan also involved the creation of an online map called the Urban Forest Visual.',en:'This _____ map shows the location of every single tree in the city\'s parks and along its roads.',a:'interactive'},
+  {n:'43',t:'g',prev:'This interactive map shows the location of every single',en:'This interactive map shows the location of every single [A] in the city\'s parks and along its roads.',blanks:[{l:'[A]',c:['tree','trees'],a:'tree'}]},
+  {n:'44',t:'b',prev:'This interactive map shows the location of every single tree in the city\'s parks and along its roads.',en:'It uses colors and symbols to _____ each tree\'s age and genus.',a:'indicate'},
+  {n:'45',t:'b',prev:'It uses colors and symbols to indicate each tree\'s age and',en:'It uses colors and symbols to indicate each tree\'s age and _____.',a:'genus'},
+  {n:'46',t:'b',prev:'It uses colors and symbols to indicate each tree\'s age and genus.',en:'Also, users can click on a tree to _____ _____ its species and even send it an email.',a:'find out'},
+  {n:'47',t:'g',prev:'Also, users can click on a tree to find out its species and even',en:'Also, users can click on a tree to find out its species and even [A] it an email.',blanks:[{l:'[A]',c:['send','receive'],a:'send'}]},
+  {n:'48',t:'w',prev:'Also, users can click on a tree to find out its species and even send it an email.',en:'At first, the \'Email this tree\' function had a _____ purpose.',ws:['particular','specific','general'],a:'general'},
+  {n:'49',t:'o',prev:'At first, the \'Email this tree\' function had a particular purpose.',ko:'그것은 사람들이 의회에서 일하는 사람들에게 쉽게 알려주도록 하기 위해 고안되었다.',en:'_____',ws:['It was designed','to allow people','to easily inform','council workers'],a:'It was designed to allow people to easily inform council workers'},
+  {n:'50',t:'g',prev:'It was designed to allow people to easily inform council workers about trees',en:'It was designed to allow people to easily inform council workers about trees [A] were damaged or in poor health.',blanks:[{l:'[A]',c:['that','what'],a:'that'}]},
+  {n:'51',t:'g',prev:'It was designed to allow people to easily inform council workers about trees that',en:'It was designed to allow people to easily inform council workers about trees that [A] or in poor health.',blanks:[{l:'[A]',c:['were damaged','damaged'],a:'were damaged'}]},
+  {n:'52',t:'g',prev:'It was designed to allow people to easily inform council workers about trees that were damaged or in poor health.',en:'After the map [A] online, something unexpected happened.',blanks:[{l:'[A]',c:['posted','was posted'],a:'was posted'}]},
+  {n:'53',t:'g',prev:'After the map was posted online,',en:'After the map was posted online, something [A] happened.',blanks:[{l:'[A]',c:['expected','unexpected'],a:'unexpected'}]},
+  {n:'54',t:'w',prev:'After the map was posted online, something unexpected happened.',en:'The trees started _____ thousands of emails.',ws:['receive','receiving','to receive'],a:'receive'},
+  {n:'55',t:'g',prev:'The trees started receiving thousands of emails, but many of them',en:'Many of them [A] not reports about damage or poor health.',blanks:[{l:'[A]',c:['was','were'],a:'were'}]},
+  {n:'56',t:'b',prev:'The trees started receiving thousands of emails, but many of them were not reports about damage or poor health. Instead, they were love letters, poems,',en:'Instead, they were love letters, poems, _____, and messages expressing gratitude for the trees.',a:'greetings'},
+  {n:'57',t:'w',prev:'Instead, they were love letters, poems, greetings, and messages expressing',en:'They were messages expressing _____ for the trees.',ws:['gratitude','hostility','appreciation'],a:'hostility'},
+  {n:'58',t:'o',prev:'One person wrote,',ko:'나는 빛이 네 잎들 위에 비치는 방식과 네 가지들이 얼마나 낮게 늘어져 있는지가 좋아.',en:'_____.',ws:['I love','the way','the light shines','on your leaves','and how','your branches','hang so low'],a:'I love the way the light shines on your leaves and how your branches hang so low.'},
+  {n:'59',t:'g',prev:'I love the way the light shines on your leaves and how your branches hang so low.',en:'It is almost like you are [A] to hug me.',blanks:[{l:'[A]',c:['trying','tried'],a:'trying'}]},
+  {n:'60',t:'b',prev:'It is almost like you are trying to hug me.',en:'The tree mail _____ quickly spread, and people all over the world started sending messages.',a:'phenomenon'},
+  {n:'61',t:'w',prev:'The tree mail phenomenon quickly spread, and people all over the world started',en:'People all over the world started _____ messages.',ws:['send','sending','to send'],a:'send'},
+  {n:'62',t:'g',prev:'People all over the world started sending messages.',en:'A message [A] was sent all the way from Russia said something.',blanks:[{l:'[A]',c:['what','that'],a:'that'}]},
+  {n:'63',t:'g',prev:'A message that',en:'A message that [A] all the way from Russia said something.',blanks:[{l:'[A]',c:['was sent','sent'],a:'was sent'}]},
+  {n:'64',t:'o',prev:'When I read about this wonderful project,',ko:'나는 너에게 쓰도록 고무되었어.',en:'_____,',ws:['I was inspired','to write','to you'],a:'I was inspired to write to you'},
+  {n:'65',t:'g',prev:'I was inspired to write to you,',en:'I was inspired to write to you, [A] I live thousands of miles away.',blanks:[{l:'[A]',c:['even though','in spite of'],a:'even though'}]},
+  {n:'66',t:'g',prev:'I was inspired to write to you, even though I live thousands of miles away.',en:'[A] we are separated by a great distance, we share the same planet and the same environment.',blanks:[{l:'[A]',c:['Despite','Although'],a:'Although'}]},
+  {n:'67',t:'b',prev:'Although we are',en:'Although we are _____ by a great distance, we share the same planet and the same environment.',a:'separated'},
+  {n:'68',t:'o',prev:'Perhaps one day we will meet. Until then,',ko:'나는 네가 건강하고 튼튼하게 지낼 수 있기를 바라.',en:'_____.',ws:['I hope','you can','stay','healthy and strong'],a:'I hope you can stay healthy and strong.'},
+  {n:'69',t:'o',prev:'I hope you can stay healthy and strong.',ko:'나무 메일 현상의 세계적인 인기는 우리 모두가 자연과 연결되어 있다는 것을 우리에게 상기시켜 준다.',en:'_____,',ws:['The global popularity','of the tree mail phenomenon','reminds us','that','we are all connected','to nature'],a:'The global popularity of the tree mail phenomenon reminds us that we are all connected to nature'},
+  {n:'70',t:'b',prev:'The global popularity of the tree mail phenomenon reminds us that we are all connected to nature,',en:'We are all _____ _____ building a more sustainable world.',a:'involved in'},
+  {n:'71',t:'g',prev:'We are all involved in building a more',en:'We are all involved in building a more [A] world.',blanks:[{l:'[A]',c:['sustainable','destructive'],a:'sustainable'}]},
+  {n:'72',t:'g',prev:'We are all involved in building a more sustainable world.',en:'Without [A] action from people across the globe, we would have little hope of saving our planet for future generations.',blanks:[{l:'[A]',c:['individual','collective'],a:'collective'}]},
+  {n:'73',t:'o',prev:'Without collective action from people across the globe,',ko:'우리는 미래 세대들을 위해 우리의 지구를 구할 희망을 거의 갖지 못할 것이다.',en:'Without collective action from people across the globe, _____ .',ws:['we would have','little hope','of saving','our planet','for future generations'],a:'we would have little hope of saving our planet for future generations'},
+  {n:'74',t:'g',prev:'Without collective action from people across the globe, we would have little hope of saving our planet for future generations.',en:'[A], the tree mail phenomenon has inspired many Melbourne residents to offer their own ideas.',blanks:[{l:'[A]',c:['Locally','Globally'],a:'Locally'}]},
+  {n:'75',t:'o',prev:'Locally,',ko:'나무 메일 현상은 많은 멜버른 주민들이 그들만의 아이디어를 제시하도록 고무시켰다.',en:'Locally, _____ about building an environmentally friendly urban environment.',ws:['the tree mail phenomenon','has inspired','many Melbourne residents','to offer','their own ideas'],a:'the tree mail phenomenon has inspired many Melbourne residents to offer their own ideas'},
+  {n:'76',t:'b',prev:'Locally, the tree mail phenomenon has inspired many Melbourne residents to offer their own ideas about building an',en:'Locally, the tree mail phenomenon has inspired many Melbourne residents to offer their own ideas about building an _____ _____ urban environment.',a:'environmentally friendly'},
+  {n:'77',t:'b',prev:'Locally, the tree mail phenomenon has inspired many Melbourne residents to offer their own ideas about building an environmentally friendly urban environment.',en:'Some have even volunteered to _____ trees and monitor animals for nature programs in the city.',a:'measure'},
+  {n:'78',t:'b',prev:'Some have even volunteered to measure trees and',en:'Some have even volunteered to measure trees and _____ animals for nature programs in the city.',a:'monitor'},
+  {n:'79',t:'g',prev:'Some have even volunteered to measure trees and monitor animals for nature programs in the city.',en:'[A], the Urban Forest Strategy\'s tree planting project has remained on track.',blanks:[{l:'[A]',c:['Meanwhile','Moreover'],a:'Meanwhile'}]},
+  {n:'80',t:'b',prev:'Meanwhile, the Urban Forest Strategy\'s tree planting project has remained',en:'The Urban Forest Strategy\'s tree planting project has remained _____ _____, and canopy cover is predicted to increase.',a:'on track'},
+  {n:'81',t:'g',prev:'Meanwhile, the Urban Forest Strategy\'s tree planting project has remained on track, and canopy cover is',en:'Canopy cover is [A] to increase from 23 percent in 2012 to 40 percent by the year 2040.',blanks:[{l:'[A]',c:['predicted','predicting'],a:'predicted'}]},
+  {n:'82',t:'g',prev:'Canopy cover is predicted',en:'Canopy cover is predicted [A] from 23 percent in 2012 to 40 percent by the year 2040.',blanks:[{l:'[A]',c:['increasing','to increase'],a:'to increase'}]},
+  {n:'83',t:'g',prev:'Canopy cover is predicted to increase from 23 percent in 2012 to 40 percent by the year 2040.',en:'Melbourne\'s urban forest strategy will help [A] the city cool.',blanks:[{l:'[A]',c:['keep','kept'],a:'keep'}]},
+  {n:'84',t:'o',prev:'Melbourne\'s urban forest strategy will help keep the city cool.',ko:'그것은 또한 주민들이 자연과 소통하고 야외 활동들에 참여하게 해줄 것이다.',en:'_____every day.',ws:['It will also','allow residents','to interact with nature','and engage in','outdoor activities'],a:'It will also allow residents to interact with nature and engage in outdoor activities'},
+  {n:'85',t:'b',prev:'It will also allow residents to interact with nature and engage in outdoor activities every day.',en:'As a result, residents will be happier and healthier as they move toward a _____ future.',a:'greener'},
+  {n:'86',t:'b',prev:'Protecting Elves, Protecting Nature',en:'Elves have been an important part of Iceland\'s _____ culture and myths for centuries.',a:'folk'},
+  {n:'87',t:'b',prev:'Elves have been an important part of Iceland\'s folk culture and',en:'Elves have been an important part of Iceland\'s folk culture and _____ for centuries.',a:'myths'},
+  {n:'88',t:'g',prev:'Elves have been an important part of Iceland\'s folk culture and myths for centuries, and most Icelanders like to imagine',en:'Most Icelanders like to imagine [A] elves exist among them.',blanks:[{l:'[A]',c:['which','that'],a:'that'}]},
+  {n:'89',t:'o',prev:'Most Icelanders like to imagine that elves exist among them.',ko:'아이슬란드인들의 이 상상의 존재들에 대한 관심은 그들에게 자연과의 감정적 연결을 준다.',en:'_____.',ws:['Icelanders\' interest','in these imaginary beings','gives them','an emotional connection','to nature'],a:'Icelanders\' interest in these imaginary beings gives them an emotional connection to nature.'},
+  {n:'90',t:'o',prev:'In Icelandic culture,',ko:'사람들이 바위와 언덕을 존중하고 보호하는 것이 중요하다.',en:'In Icelandic culture, _____ because they are homes for elves.',ws:['it is important','for people','to respect','and protect','rocks and hills'],a:'it is important for people to respect and protect rocks and hills'},
+  {n:'91',t:'g',prev:'It is important for people to respect and protect rocks and hills',en:'It is important for people to respect and protect rocks and hills [A] they are homes for elves.',blanks:[{l:'[A]',c:['because','because of'],a:'because'}]},
+  {n:'92',t:'g',prev:'It is important for people to respect and protect rocks and hills because they are homes for elves.',en:'[A], people think twice about digging up the country\'s beautiful natural landscapes.',blanks:[{l:'[A]',c:['However','Therefore'],a:'Therefore'}]},
+  {n:'93',t:'b',prev:'Therefore, people think twice about',en:'Therefore, people think twice about _____ _____ the country\'s beautiful natural landscapes.',a:'digging up'},
+  {n:'94',t:'b',prev:'Therefore, people think twice about digging up the country\'s beautiful natural',en:'Also, plans for the construction of roads, factories, and bridges are sometimes changed. People think twice about digging up the country\'s beautiful natural _____.',a:'landscapes'},
+  {n:'95',t:'g',prev:'Also, plans for the',en:'Plans for the [A] of roads, factories, and bridges are sometimes changed.',blanks:[{l:'[A]',c:['construction','destruction'],a:'construction'}]},
+  {n:'96',t:'b',prev:'Also, plans for the construction of roads, factories, and bridges are sometimes changed.',en:'_____ _____ the elves of Iceland, nature is being protected.',a:'Thanks to'},
+  {n:'97',t:'g',prev:'Thanks to the elves of Iceland, nature is',en:'Thanks to the elves of Iceland, nature is [A].',blanks:[{l:'[A]',c:['being protected','protecting'],a:'being protected'}]}
+];
+
+const TOTAL=30, CUTLINE=3;
+const T_G=5,T_B=10,T_O=30,CIRCUM=2*Math.PI*20;
+const STORAGE_KEY='quiz_history_tree';
+let questions=[],idx=0,answers={},timeouts={},screen='intro';
+let timerSec=5,timerInterval=null,advancing=false;
+let orderPlaced=[],orderAvail=[];
+
+function loadHistory(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');}catch{return[];}}
+function saveHistory(c,t,cl,wi){
+  const h=loadHistory();
+  h.unshift({date:new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}),correct:c,total:t,cutline:cl,pct:Math.round((c/t)*100),pass:c>=cl,wrongs:wi});
+  if(h.length>20)h.pop();
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(h));}catch{}
+}
+function shuffle(a){let b=[...a];for(let i=b.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function getTime(q){return q.t==='o'?T_O:q.t==='b'?T_B:T_G;}
+function start(){questions=shuffle(ALL_Q).slice(0,TOTAL);idx=0;answers={};timeouts={};screen='quiz';advancing=false;initOrder();startTimer();render();}
+function initOrder(){const q=questions[idx];if(q&&q.t==='o'){orderAvail=shuffle([...q.ws]);orderPlaced=[];}}
+function startTimer(){clearInterval(timerInterval);timerSec=getTime(questions[idx]);timerInterval=setInterval(()=>{timerSec--;updateTimerUI();if(timerSec<=0)onTimeout();},1000);}
+function updateTimerUI(){
+  const ring=document.querySelector('.ring-fill'),num=document.querySelector('.timer-num'),wrap=document.querySelector('.tw-inner');
+  if(!ring||!num)return;
+  const mx=getTime(questions[idx]);
+  ring.style.strokeDashoffset=CIRCUM*(1-(timerSec/mx));
+  num.textContent=timerSec;
+  if(wrap)wrap.className='tw-inner'+(timerSec<=Math.ceil(mx*.12)?'td':timerSec<=Math.ceil(mx*.3)?'tw':'');
+}
+function onTimeout(){if(advancing)return;clearInterval(timerInterval);timeouts[idx]=true;answers[idx]='__timeout__';advancing=true;render();setTimeout(()=>{advancing=false;advance();},1300);}
+function advance(){if(idx<TOTAL-1){advancing=false;idx++;initOrder();startTimer();render();}else{clearInterval(timerInterval);screen='result';render();}}
+function isCorrect(q,qi){
+  const a=answers[qi];if(!a||a==='__timeout__')return false;
+  if(q.t==='g')return q.blanks.every((_,bi)=>answers[`${qi}_${bi}`]===q.blanks[bi].a);
+  if(q.t==='b')return a.trim().toLowerCase()===q.a.toLowerCase();
+  if(q.t==='w')return a===q.a;
+  if(q.t==='o')return a.trim().toLowerCase().replace(/[.,!?'"]/g,'')===q.a.trim().toLowerCase().replace(/[.,!?'"]/g,'');
+  return false;
+}
+function scoreQ(){return questions.reduce((c,q,qi)=>isCorrect(q,qi)?c+1:c,0);}
+function tLabel(t){return t==='g'?'어법 선택':t==='b'?'빈칸 완성':'어순 배열';}
+function tCls(t){return t==='g'?'tb-g':t==='b'?'tb-b':'tb-o';}
+function tTime(t){return t==='g'?'5초':t==='b'?'10초':'30초';}
+
+function render(){const app=document.getElementById('app');if(screen==='intro')app.innerHTML=renderIntro();else if(screen==='quiz')app.innerHTML=renderQuiz();else app.innerHTML=renderResult();attachEvents();}
+
+function renderIntro(){
+  const types=['g','b','o'],dots={g:'#185FA5',b:'#6B3FA0',o:'#BA7517'};
+  const hist=loadHistory();
+  const histHtml=hist.length===0?`<div class="hist-empty">아직 풀이 기록이 없어요</div>`
+    :hist.map((h,hi)=>{
+      const wh=(h.wrongs&&h.wrongs.length>0)?h.wrongs.map(w=>`<div class="hd-item ${w.isTO?'hd-to':'hd-ng'}"><div class="hd-qnum">${w.n} &nbsp;<span class="type-badge ${w.tcls}" style="font-size:10px;padding:2px 7px;">${w.tlbl}</span>${w.isTO?' ⏰':''}</div>${w.en?`<div class="hd-en">${w.en}</div>`:''}<div class="hd-tags"><span class="tag tag-ng">${w.isTO?'시간초과':'입력: '+w.ua}</span><span class="tag tag-ok">정답: ${w.ans}</span></div></div>`).join(''):`<div style="font-size:12px;color:var(--hint);text-align:center;padding:8px 0;">오답 없음 🎉</div>`;
+      return `<div class="hist-item" data-hi="${hi}"><div class="hist-top"><div class="hist-left"><div class="hist-date">${h.date}</div><div class="hist-score ${h.pass?'pass':'fail'}">${h.correct} / ${h.total}</div><div class="hist-bar-wrap"><div class="hist-bar" style="width:${h.pct}%;background:${h.pass?'var(--green)':'var(--red)'}"></div></div><div class="hist-pct">정답률 ${h.pct}%</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;"><span class="hist-badge ${h.pass?'hb-pass':'hb-fail'}">${h.pass?'합격':'불합격'}</span><span style="font-size:11px;color:var(--muted);" class="hist-toggle-txt">오답 보기 ▼</span></div></div><div class="hist-detail" id="hd-${hi}">${wh}</div></div>`;
+    }).join('');
+  return `<div class="intro-box">
+  <div class="intro-logo">수능형 지문</div>
+  <div class="intro-title">Dear Tree</div>
+  <div class="intro-sub">Melbourne Urban Forest · 복합유형 (97문항 → 랜덤 30문항)</div>
+  <div class="type-legend">${types.map(t=>`<span class="type-badge ${tCls(t)}">${tLabel(t)}</span>`).join('')}</div>
+  <div class="info-grid">
+    <div class="info-card"><div class="info-num">${TOTAL}</div><div class="info-lbl">전체 문항</div></div>
+    <div class="info-card"><div class="info-num">${CUTLINE}개</div><div class="info-lbl">합격 커트라인</div></div>
+    <div class="info-card"><div class="info-num">3가지</div><div class="info-lbl">문제 유형</div></div>
+  </div>
+  <div class="time-grid">${types.map(t=>`<div class="time-card"><div class="time-dot" style="background:${dots[t]}"></div><div><div class="time-lbl">${tLabel(t)}</div><div class="time-val">제한 ${tTime(t)}</div></div></div>`).join('')}</div>
+  <button class="start-btn" id="start-btn">시작하기</button>
+  <div class="hist-section"><div class="hist-title"><span>📋 이전 풀이 기록 (최대 20회)</span>${hist.length>0?`<button class="hist-clear" id="hist-clear">기록 삭제</button>`:''}</div>${histHtml}</div>
+</div>`;
+}
+
+function renderQuiz(){
+  const q=questions[idx],mx=getTime(q),pct=Math.round((idx/TOTAL)*100);
+  const offset=CIRCUM*(1-(timerSec/mx)),twCls=timerSec<=Math.ceil(mx*.12)?'td':timerSec<=Math.ceil(mx*.3)?'tw':'';
+  const isTO=timeouts[idx];
+  let enHtml=q.en||'';
+  if(q.t==='g'&&q.blanks)q.blanks.forEach(b=>{enHtml=enHtml.replace(b.l,`<span class="blank-tag">${b.l}</span>`);});
+  const curBi=q.t==='g'?q.blanks.findIndex((_,bi)=>answers[`${idx}_${bi}`]===undefined):-1;
+  const b=curBi>=0?q.blanks[curBi]:null;
+  let body='';
+  if(isTO){
+    const ans=q.t==='g'?q.blanks.map(x=>x.a).join(' / '):q.a;
+    body=`<div class="timeout-msg">⏰ 시간 초과! &nbsp;정답: <strong>${ans}</strong></div>`;
+  } else if(q.t==='g'&&b){
+    body=`<div class="q-sub">${b.l} 중 알맞은 것은?</div><div class="choices">${b.c.map(c=>`<button class="choice-btn" data-t="g" data-bi="${curBi}" data-ch="${c}">${c}</button>`).join('')}</div>`;
+  } else if(q.t==='b'&&!answers[idx]){
+    const prevHtmlB=q.prev?`<div style="font-size:13px;color:var(--muted);background:var(--bg);border-radius:var(--rs);padding:8px 12px;margin-bottom:10px;line-height:1.6;border-left:3px solid var(--green)"><span style="font-size:10px;font-weight:800;color:var(--green);display:block;margin-bottom:2px">앞 문장</span>${q.prev}</div>`:'';
+    body=`${prevHtmlB}<div class="blank-input-wrap"><input class="blank-input" id="blank-inp" type="text" placeholder="영어로 입력하세요" autocomplete="off" autocorrect="off" spellcheck="false"><button class="submit-btn" id="blank-sub">확인</button></div>`;
+  } else if(q.t==='b'&&answers[idx]){
+    const ok=answers[idx].trim().toLowerCase()===q.a.toLowerCase();
+    body=`<div class="answer-reveal ${ok?'ar-ok':'ar-ng'}">${ok?'✓ 정답입니다!':'✗ 오답 — 정답: <strong>'+q.a+'</strong>'}</div>`;
+  } else if(q.t==='o'&&!answers[idx]){
+    const ph=orderPlaced.length>0?orderPlaced.map((w,i)=>`<span class="word-chip wc-placed" data-pi="${i}">${w}</span>`).join(''):`<span style="font-size:12px;color:var(--hint)">단어를 클릭해서 순서대로 배열하세요</span>`;
+    const ah=orderAvail.map((w,i)=>`<span class="word-chip wc-avail" data-ai="${i}">${w}</span>`).join('');
+    const prevHtml=q.prev?`<div style="font-size:13px;color:var(--muted);background:var(--bg);border-radius:var(--rs);padding:8px 12px;margin-bottom:10px;line-height:1.6;border-left:3px solid var(--green)"><span style="font-size:10px;font-weight:800;color:var(--green);display:block;margin-bottom:2px">앞 문장</span>${q.prev}</div>`:'';
+    body=`${prevHtml}<div class="order-area-lbl">배열 순서</div><div class="order-area ${orderPlaced.length>0?'filled':''}">${ph}</div><div class="order-area-lbl" style="margin-top:10px;">단어 목록</div><div class="order-area">${ah}</div><button class="order-check-btn" id="order-check" ${orderPlaced.length===0?'disabled':''}>정답 확인</button>`;
+  } else if(q.t==='o'&&answers[idx]){
+    const ok=isCorrect(q,idx);
+    body=`<div class="answer-reveal ${ok?'ar-ok':'ar-ng'}">${ok?'✓ 정답입니다!':'✗ 오답 — 정답: <strong>'+q.a+'</strong>'}</div>`;
+  } else if(q.t==='w'&&!answers[idx]){
+    body=`<div class="q-sub">알맞지 않은 것을 고르세요</div><div class="choices">${q.ws.map(c=>`<button class="choice-btn" data-t="w" data-bi="0" data-ch="${c}">${c}</button>`).join('')}</div>`;
+  } else if(q.t==='w'&&answers[idx]){
+    const ok=isCorrect(q,idx);
+    body=`<div class="answer-reveal ${ok?'ar-ok':'ar-ng'}">${ok?'✓ 정답입니다!':'✗ 오답 — 정답: <strong>'+q.a+'</strong>'}</div>`;
+  }
+  return `<div class="hd-row"><div class="quiz-counter">문항 ${idx+1} / ${TOTAL}</div><div class="cutline-chip">커트라인 ${CUTLINE}개</div></div>
+<div class="progress-wrap"><div class="progress-fill" style="width:${pct}%"></div></div>
+<div class="timer-row"><div class="timer-block"><div class="timer-lbl">남은시간</div>
+<div class="tw-inner ${twCls}"><div class="timer-ring"><svg width="52" height="52" viewBox="0 0 52 52"><circle class="ring-bg" cx="26" cy="26" r="20"/><circle class="ring-fill" cx="26" cy="26" r="20" stroke-dasharray="${CIRCUM}" stroke-dashoffset="${offset}"/></svg><div class="timer-num">${timerSec}</div></div></div></div></div>
+<div class="q-card">
+  <div class="q-num">${q.n} &nbsp;<span class="type-badge ${tCls(q.t)}">${tLabel(q.t)}</span></div>
+  ${enHtml?`<div class="q-en">${enHtml}</div>`:''}
+  ${q.t==='o'?`<div class="q-sub">단어를 올바른 순서로 배열하세요</div>`:''}
+  ${body}
+</div>`;
+}
+
+function renderResult(){
+  const correct=scoreQ(),toCount=Object.keys(timeouts).length,pass=correct>=CUTLINE;
+  const pct=Math.round((correct/TOTAL)*100),emoji=pass?(correct===TOTAL?'🎉':'👍'):(correct>=Math.ceil(TOTAL*.7)?'💪':'📚');
+  const wrongIdxs=questions.map((_,qi)=>qi).filter(qi=>!isCorrect(questions[qi],qi));
+  const wrongItems=wrongIdxs.map(qi=>{
+    const q=questions[qi],isTO=!!timeouts[qi];
+    const ans=q.t==='g'?q.blanks.map(x=>x.a).join(' / '):q.a;
+    const ua=q.t==='g'?q.blanks.map((_,bi)=>{const s=answers[`${qi}_${bi}`];return(!s||s==='__timeout__')?'시간초과':s;}).join(' / '):(!answers[qi]||answers[qi]==='__timeout__'?'시간초과':answers[qi]);
+    return{n:q.n,t:q.t,tlbl:tLabel(q.t),tcls:tCls(q.t),en:q.en||'',ans,ua,isTO};
+  });
+  saveHistory(correct,TOTAL,CUTLINE,wrongItems);
+  return `<div class="result-card"><div class="result-emoji">${emoji}</div><div class="result-score ${pass?'score-pass':'score-fail'}">${correct} / ${TOTAL}</div><div class="result-badge ${pass?'badge-pass':'badge-fail'}">${pass?'합격 ✓':'불합격 ✗'} · 커트라인 ${CUTLINE}개</div><div class="result-pct">정답률 ${pct}%</div><div class="stat-row"><div class="stat-card"><div class="stat-num s-ok">${correct}</div><div class="stat-lbl">정답</div></div><div class="stat-card"><div class="stat-num s-ng">${TOTAL-correct-toCount}</div><div class="stat-lbl">오답</div></div><div class="stat-card"><div class="stat-num s-to">${toCount}</div><div class="stat-lbl">시간초과</div></div></div><button class="retry-btn" id="retry-btn">다시 풀기</button></div>
+${wrongIdxs.length>0?`<div class="review-title">오답 목록 (${wrongIdxs.length}개)</div>${wrongIdxs.map(qi=>{const q=questions[qi],isTO=!!timeouts[qi];const ans=q.t==='g'?q.blanks.map(x=>x.a).join(' / '):q.a;const ua=q.t==='g'?q.blanks.map((_,bi)=>{const s=answers[`${qi}_${bi}`];return(!s||s==='__timeout__')?'시간초과':s;}).join(' / '):(!answers[qi]||answers[qi]==='__timeout__'?'시간초과':answers[qi]);return `<div class="review-item ${isTO?'to':''}"><div class="r-num">${q.n} &nbsp;<span class="type-badge ${tCls(q.t)}">${tLabel(q.t)}</span>${isTO?' ⏰':''}</div>${q.en?`<div class="r-en">${q.en}</div>`:''}<span class="tag ${isTO?'tag-to':'tag-ng'}">${isTO?'시간초과':'입력: '+ua}</span><span class="tag tag-ok">정답: ${ans}</span></div>`;}).join('')}`:`<div style="text-align:center;color:var(--green);font-weight:800;padding:20px;font-size:15px;">전 문항 정답! 완벽합니다 🎉</div>`}`;
+}
+
+function attachEvents(){
+  const app=document.getElementById('app');
+  const s=app.querySelector('#start-btn');if(s)s.addEventListener('click',start);
+  const r=app.querySelector('#retry-btn');if(r)r.addEventListener('click',start);
+  const hc=app.querySelector('#hist-clear');if(hc)hc.addEventListener('click',()=>{try{localStorage.removeItem(STORAGE_KEY);}catch{}render();});
+  app.querySelectorAll('.hist-item').forEach(item=>{
+    item.addEventListener('click',e=>{
+      if(e.target.closest('#hist-clear'))return;
+      const hi=item.dataset.hi,detail=document.getElementById('hd-'+hi);if(!detail)return;
+      const isOpen=detail.classList.contains('open');
+      app.querySelectorAll('.hist-detail').forEach(d=>d.classList.remove('open'));
+      app.querySelectorAll('.hist-toggle-txt').forEach(t=>{t.textContent='오답 보기 ▼';});
+      if(!isOpen){detail.classList.add('open');const txt=item.querySelector('.hist-toggle-txt');if(txt)txt.textContent='닫기 ▲';}
+    });
+  });
+  app.querySelectorAll('.choice-btn').forEach(btn=>btn.addEventListener('click',()=>{
+    const t=btn.dataset.t,ch=btn.dataset.ch;
+    if(t==='g'){
+      const bi=parseInt(btn.dataset.bi),key=`${idx}_${bi}`;
+      if(answers[key]!==undefined||advancing)return;
+      clearInterval(timerInterval);advancing=true;
+      const cor=questions[idx].blanks[bi].a;answers[key]=ch;answers[idx]=ch;
+      const ok=ch===cor;btn.classList.add(ok?'correct':'wrong');
+      btn.parentElement.querySelectorAll('.choice-btn').forEach(b2=>{b2.disabled=true;if(!ok&&b2.dataset.ch===cor)b2.classList.add('correct');});
+      const nb=questions[idx].blanks.findIndex((_,i)=>answers[`${idx}_${i}`]===undefined);
+      setTimeout(()=>{if(nb>=0){advancing=false;clearInterval(timerInterval);timerSec=T_G;startTimer();render();}else{advancing=false;advance();}},ok?400:800);
+    } else if(t==='w'){
+      if(answers[idx]!==undefined||advancing)return;
+      clearInterval(timerInterval);advancing=true;
+      const ok=ch===questions[idx].a;
+      answers[idx]=ch;
+      btn.classList.add(ok?'correct':'wrong');
+      btn.parentElement.querySelectorAll('.choice-btn').forEach(b2=>{b2.disabled=true;if(!ok&&b2.dataset.ch===questions[idx].a)b2.classList.add('correct');});
+      setTimeout(()=>{advancing=false;advance();},ok?400:800);
+    }
+  }));
+  const bi=app.querySelector('#blank-inp'),bs=app.querySelector('#blank-sub');
+  if(bi&&bs){
+    const doSub=()=>{
+      const val=bi.value.trim();if(!val||advancing)return;
+      clearInterval(timerInterval);advancing=true;answers[idx]=val;
+      const ok=val.toLowerCase()===questions[idx].a.toLowerCase();
+      bi.classList.add(ok?'correct':'wrong');bi.disabled=true;bs.disabled=true;
+      const fb=document.createElement('div');fb.className=`answer-reveal ${ok?'ar-ok':'ar-ng'}`;
+      fb.innerHTML=ok?'✓ 정답입니다!':'✗ 오답 — 정답: <strong>'+questions[idx].a+'</strong>';
+      bs.parentElement.parentElement.appendChild(fb);
+      setTimeout(()=>{advancing=false;advance();},ok?600:1100);
+    };
+    bs.addEventListener('click',doSub);bi.addEventListener('keydown',e=>{if(e.key==='Enter')doSub();});setTimeout(()=>bi.focus(),80);
+  }
+  app.querySelectorAll('.wc-placed').forEach(chip=>chip.addEventListener('click',()=>{const i=parseInt(chip.dataset.pi);orderAvail.push(orderPlaced[i]);orderPlaced.splice(i,1);render();}));
+  app.querySelectorAll('.wc-avail').forEach(chip=>chip.addEventListener('click',()=>{const i=parseInt(chip.dataset.ai);orderPlaced.push(orderAvail[i]);orderAvail.splice(i,1);render();}));
+  const oc=app.querySelector('#order-check');
+  if(oc)oc.addEventListener('click',()=>{
+    if(orderPlaced.length===0||advancing)return;
+    clearInterval(timerInterval);advancing=true;
+    const ua=orderPlaced.join(' ');answers[idx]=ua;
+    const ok=isCorrect(questions[idx],idx);
+    const fb=document.createElement('div');fb.className=`answer-reveal ${ok?'ar-ok':'ar-ng'}`;
+    fb.innerHTML=ok?'✓ 정답입니다!':'✗ 오답 — 정답: <strong>'+questions[idx].a+'</strong>';
+    oc.parentElement.appendChild(fb);oc.disabled=true;
+    app.querySelectorAll('.word-chip').forEach(c=>c.style.pointerEvents='none');
+    setTimeout(()=>{advancing=false;advance();},ok?600:1200);
+  });
+}
+render();
+</script>
+</body>
+</html>
